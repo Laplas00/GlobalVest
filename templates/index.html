@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>GlobalInvest — Премиальные инвестиционные решения</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    :root {
+      --bg-dark: #0a0a0a;
+      --bg-light: #f8f8f8;
+      --text-dark: #ffffff;
+      --text-light: #121212;
+      --accent-primary: #00e676;
+      --accent-secondary: #00b0ff;
+      --card-bg-dark: rgba(20, 20, 20, 0.8);
+      --card-bg-light: rgba(255, 255, 255, 0.9);
+      --border-dark: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --text: var(--text-dark);
+      --card-bg: var(--card-bg-dark);
+      --border: var(--border-dark);
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --text: var(--text-light);
+      --card-bg: var(--card-bg-light);
+      --border: var(--border-light);
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      scroll-behavior: smooth;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      line-height: 1.6;
+    }
+
+    /* Градиентный фон с анимацией */
+    .gradient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      background-size: 400% 400%;
+      animation: gradientFlow 15s ease infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Частицы */
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Шапка */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 5%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.5);
+      backdrop-filter: blur(15px);
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.4s ease;
+    }
+
+    header.scrolled {
+      padding: 15px 5%;
+      background: rgba(10, 10, 10, 0.9);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 24px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    .logo-icon {
+      margin-right: 10px;
+      font-size: 28px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent-primary);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(30deg);
+    }
+
+    /* Герой-секция */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 0 5%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      max-width: 800px;
+      z-index: 2;
+      padding-top: 100px;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 25px;
+      line-height: 1.2;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadeInUp 1s ease;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+      opacity: 0.9;
+      max-width: 600px;
+      animation: fadeInUp 1s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      animation: fadeInUp 1s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      color: #000;
+      box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 230, 118, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--accent-primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 230, 118, 0.1);
+      transform: translateY(-3px);
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    /* Секции */
+    .section {
+      padding: 100px 5%;
+      position: relative;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 60px;
+      text-align: center;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    /* Лицензии */
+    .licenses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .license-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 30px var(--shadow);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      transition: all 0.4s ease;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .license-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .license-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 35px rgba(0, 230, 118, 0.2);
+    }
+
+    .license-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: var(--accent-primary);
+    }
+
+    .license-card p {
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+
+    .license-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .license-btn:hover {
+      gap: 12px;
+      color: var(--accent-secondary);
+    }
+
+    /* Документы */
+    .documents-list {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .document-item {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 20px 25px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--accent-primary);
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .document-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .document-item:hover {
+      transform: translateX(10px);
+      box-shadow: 0 5px 15px rgba(0, 230, 118, 0.1);
+    }
+
+    .document-item h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .read-btn {
+      background: var(--accent-primary);
+      color: #000;
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .read-btn:hover {
+      background: var(--accent-secondary);
+    }
+
+    /* Модальное окно */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      position: relative;
+      animation: slideUp 0.4s ease;
+      border: 1px solid var(--border);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    .close-modal:hover {
+      color: var(--accent-primary);
+      transform: rotate(90deg);
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+      padding-right: 30px;
+    }
+
+    .modal-header h2 {
+      font-size: 1.8rem;
+      margin: 0;
+      color: var(--accent-primary);
+    }
+
+    .modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    .modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: var(--accent-primary);
+      border-radius: 3px;
+    }
+
+    /* Футер */
+    footer {
+      background: rgba(10, 10, 10, 0.8);
+      padding: 60px 5% 30px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .footer-logo {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text);
+      text-decoration: none;
+      opacity: 0.8;
+      transition: all 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      opacity: 1;
+      color: var(--accent-primary);
+    }
+
+    .footer-text {
+      opacity: 0.6;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .copyright {
+      opacity: 0.5;
+      font-size: 0.8rem;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+      
+      .section-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <!-- Градиентный фон -->
+  <div class="gradient-bg"></div>
+  
+  <!-- Частицы -->
+  <div id="particles-js"></div>
+  
+  <!-- Шапка -->
+  <header id="header">
+    <div class="logo">
+      <span class="logo-icon">📈</span>
+      GlobalInvest
+    </div>
+    
+    <nav class="nav-links">
+      <a href="#services">Услуги</a>
+      <a href="#licenses">Лицензии</a>
+      <a href="#documents">Документы</a>
+      <!-- <a href="#about">О нас</a> -->
+      <a href="#" onclick="openModal('О компании GlobalInvest', documentContent6)">О нас</a>
+    </nav>
+    
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </header>
+  
+  <!-- Герой-секция -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="animate__animated animate__fadeInUp">Инвестируйте в будущее с уверенностью</h1>
+      <p>GlobalInvest предлагает эксклюзивные инвестиционные решения для премиальных клиентов. Наши эксперты помогут вам достичь финансовых целей с минимальными рисками.</p>
+      <div class="cta-buttons">
+        <a href="/register" class="btn btn-primary">Начать инвестировать</a>
+        <a href="/login" class="btn btn-secondary">Личный кабинет</a>
+      </div>
+    </div>
+    
+    <!-- Анимированные элементы -->
+    <div class="hero-shapes">
+      <div class="shape shape-1 animate-float" style="animation-delay: 0s;"></div>
+      <div class="shape shape-2 animate-float" style="animation-delay: 2s;"></div>
+      <div class="shape shape-3 animate-float" style="animation-delay: 4s;"></div>
+    </div>
+  </section>
+  
+  <!-- Секция лицензий -->
+  <section id="licenses" class="section">
+    <h2 class="section-title">Наши лицензии</h2>
+    
+    <div class="licenses-grid">
+      <div class="license-card" data-delay="0">
+        <h3>Commission de Surveillance du Secteur Financier (CSSF)</h3>
+        <p>Финансовый регулятор Люксембурга, осуществляющий надзор за деятельностью банков, инвестиционных компаний, фондов и других финансовых учреждений.</p>
+        <a href="https://cert-ssf.org/12090994.html" class="license-btn">
+          Посмотреть лицензию
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+      
+      <div class="license-card" data-delay="0.2">
+        <h3>Vanuatu Financial Services Commission (VFSC)</h3>
+        <p>Регулятор финансового сектора Вануату, контролирующий деятельность оффшорных компаний, инвестиционных и страховых организаций.</p>
+        <a href="https://vfinsc.org/firm-611618.html" class="license-btn">
+          Посмотреть лицензию
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+      
+      <div class="license-card" data-delay="0.4">
+        <h3>Dubai Financial Services Authority (DFSA)</h3>
+        <p>Регулятор Дубайского Международного Финансового Центра, контролирующий работу банков, инвестиционных компаний и фондов.</p>
+        <a href="https://dubai-finance-certify.com/firm-654474.html" class="license-btn">
+          Посмотреть лицензию
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+      
+      <div class="license-card" data-delay="0.6">
+        <h3>Financial Conduct Authority (FCA, UK)</h3>
+        <p>Один из самых авторитетных финансовых регуляторов в мире, отвечающий за надзор за банками, страховыми компаниями.</p>
+        <a href="https://fsa-regulation-uk.net/firm-555596.html" class="license-btn">
+          Посмотреть лицензию
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Секция документов -->
+  <section id="documents" class="section">
+    <h2 class="section-title">Документы</h2>
+    
+    <div class="documents-list">
+      <div class="document-item" data-delay="0">
+        <h3>Пользовательское соглашение</h3>
+        <a href="#" class="read-btn" onclick="openModal('Пользовательское соглашение', documentContent1)">Читать</a>
+      </div>
+      
+      <div class="document-item" data-delay="0.1">
+        <h3>Заявление о раскрытии рисков</h3>
+        <a href="#" class="read-btn" onclick="openModal('Заявление о раскрытии рисков', documentContent2)">Читать</a>
+      </div>
+      
+      <div class="document-item" data-delay="0.2">
+        <h3>Противодействие отмыванию денег</h3>
+        <a href="#" class="read-btn" onclick="openModal('Противодействие отмыванию денег', documentContent3)">Читать</a>
+      </div>
+      
+      <div class="document-item" data-delay="0.3">
+        <h3>Политика в отношении конфликта интересов</h3>
+        <a href="#" class="read-btn" onclick="openModal('Политика в отношении конфликта интересов', documentContent4)">Читать</a>
+      </div>
+      
+      <div class="document-item" data-delay="0.4">
+        <h3>Политика вывода и возврата средств</h3>
+        <a href="#" class="read-btn" onclick="openModal('Политика вывода и возврата средств', documentContent5)">Читать</a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Модальное окно -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal()">&times;</span>
+      <div class="modal-header">
+        <h2 id="modal-title">Заголовок документа</h2>
+      </div>
+      <div class="modal-body" id="modal-body">
+        Содержимое документа...
+      </div>
+    </div>
+  </div>
+  
+  <!-- Футер -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo">GlobalInvest</div>
+      
+      <div class="footer-links">
+        <a href="#services">Услуги</a>
+        <a href="#licenses">Лицензии</a>
+        <a href="#documents">Документы</a>
+        <a href="#about">О компании</a>
+        <a href="#contacts">Контакты</a>
+        <a href="/privacy">Политика конфиденциальности</a>
+      </div>
+      
+      <div class="footer-text">
+        GlobalInvest - компания, оказывающая финансовые услуги. Управление компанией регламентировано и надзор за деятельностью осуществляется Dubai Financial Services Authority (DFSA) – номер лицензии инвестиционного дилера: A328344. А также Commission de Surveillance du Secteur Financier (CSSF) в соответствии с лицензией № A12090994.
+      </div>
+      
+      <div class="copyright">
+        © 2023 GlobalInvest. Все права защищены.
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Скрипты -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    // Переключение темы
+    function toggleTheme() {
+      const body = document.body;
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+    
+    // Проверка сохранённой темы
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.setAttribute('data-theme', 'light');
+    }
+    
+    // Плавное появление элементов при скролле
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.license-card, .document-item').forEach((el) => {
+      observer.observe(el);
+    });
+    
+    // Фиксация шапки при скролле
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('header');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+    
+    // Модальное окно
+    function openModal(title, content) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-body').innerHTML = content;
+      document.getElementById('modal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+    
+    // Закрытие модального окна при клике вне его
+    window.addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal')) {
+        closeModal();
+      }
+    });
+    
+    // Частицы
+    particlesJS('particles-js', {
+      "particles": {
+        "number": {
+          "value": 80,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#00e676"
+        },
+        "shape": {
+          "type": "circle",
+          "stroke": {
+            "width": 0,
+            "color": "#000000"
+          },
+          "polygon": {
+            "nb_sides": 5
+          }
+        },
+        "opacity": {
+          "value": 0.5,
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 1,
+            "opacity_min": 0.1,
+            "sync": false
+          }
+        },
+        "size": {
+          "value": 3,
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 2,
+            "size_min": 0.1,
+            "sync": false
+          }
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#00e676",
+          "opacity": 0.2,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 1,
+          "direction": "none",
+          "random": true,
+          "straight": false,
+          "out_mode": "out",
+          "bounce": false,
+          "attract": {
+            "enable": true,
+            "rotateX": 600,
+            "rotateY": 1200
+          }
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "grab"
+          },
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          },
+          "resize": true
+        },
+        "modes": {
+          "grab": {
+            "distance": 140,
+            "line_linked": {
+              "opacity": 0.5
+            }
+          },
+          "push": {
+            "particles_nb": 4
+          }
+        }
+      },
+      "retina_detect": true
+    });
+    
+    // Содержимое документов
+    const documentContent1 = `
+      <h3>Пользовательское соглашение</h3>
+      <p>Настоящий документ (далее — <strong>«Соглашение»</strong>) использует следующие термины и определения:</p>
+      
+      <p><strong>«Аффилированное лицо»</strong> — по отношению к Компании означает любое юридическое лицо, контролируемое Компанией или контролирующее Компанию прямо или косвенно, а также любое юридическое лицо, находящееся под общим контролем с Компанией. Под «контролем» понимается владение контрольным пакетом акций.</p>
+      
+      <p><strong>«База котировок»</strong> — информация о потоке котировок, хранящаяся на сервере Компании.</p>
+      
+      <p><strong>«Базовая валюта»</strong> — валюта, указанная первой в валютной паре, по курсу которой клиент покупает или продаёт котируемую валюту.</p>
+      
+      <p><strong>«Баланс»</strong> — совокупный финансовый результат всех завершённых сделок и операций по денежным переводам на торговом счёте клиента.</p>
+      
+      <p><strong>«Валюта торгового счёта»</strong> — валюта, выбранная клиентом при открытии торгового счёта.</p>
+      
+      <p><strong>«Валюта котировки»</strong> — вторая валюта в валютной паре, которую клиент покупает или продаёт за базовую валюту.</p>
+      
+      <p><strong>«Валютная пара»</strong> — объект торговой операции, основанный на изменении стоимости одной валюты по отношению к другой.</p>
+      
+      <p><strong>«Веб-сайт»</strong> — официальный веб-сайт Компании, а также иные ресурсы, признанные официальными и поддерживаемые Компанией для обслуживания клиентов.</p>
+    `;
+    
+    const documentContent2 = `
+      <h3>Заявление о раскрытии рисков</h3>
+      <p><strong>1. Риски, связанные с торговлей CFD</strong></p>
+
+      
+<p>Спекулятивный подход к операциям CFD может привести к возникновению рисков в отношении капитала пользователя. По классификации ряда надзорных органов, договоры CFD относятся к высокорисковым инструментам, поскольку они не подразумевают защиту капитала и гарантированную прибыль, и клиенты могут потерять вложенные средства. На Торговой платформе GlobalInvest невозможно потерять сумму, превышающую вложенные средства, и клиенты не могут остаться в долгу перед компанией GlobalInvest Торговля инструментами CFD подходит не для всех инвесторов; убедитесь, что вы полностью понимаете возможные риски.
+Настоящее Заявление о раскрытии рисков входит в состав Клиентских соглашений в соответствии с определением, приведенным в настоящем Пользовательском соглашении.</p>
+
+<p>1.1 Вы рассматриваете возможность использования Торговой платформы Компании GlobalInvest («Компания», «мы» и т.п.) для совершения операций с договорами на получение разницы («Договоры CFD»). Договоры CFD являются высокорисковыми инвестициями, которые не подходят для многих инвесторов.</p>
+
+<p>1.2 В настоящем заявлении содержится информация о рисках, связанных с операциями с CFD, однако в нем не могут быть разьяснены все риски, а такке не может разьясняться, как такие риски связаны с вашими личными обстоятельствами. В случае сомнений вам следует обратиться за советом к профессионалам.</p>
+
+<p>1.3 Важно, чтобы вы хорошо понимали возможные риски до совершения торговых операций с Компанией. Если вы примите решение о совершении торговых операций с Компанией, важно, чтобы вы помнили о существующих рисках, имели адекватные финансовые ресурсы, достаточные для принятия таких рисков, и чтобы вы внимательно отслеживали свои позиции.</p>
+
+      <p><strong>2. Возможность наступления больших убытков</strong><p>
+
+<p>2.1 Суть торговли с кредитным плечом заключается в том, что и прибыль и убыток могут быть увеличены, и, за исключением случаев, когда пользователь размещает Заявку на закрытие с убытком или Ограниченную заявку, он может понести очень большие убытки, если цена на открытую им позицию изменится неблагоприятным образом. Однако ваши потери не могут превысить сумму, имеющуюся на Торговом счете.</p>
+      
+      <p><strong>Высокий уровень кредитного плеча</strong> может работать как в вашу пользу, так и против вас. Прежде чем принимать решение о торговле нашими продуктами, вы должны тщательно обдумать свои инвестиционные цели, уровень опыта и склонность к риску.</p>
+      
+      <p>Существует вероятность того, что вы можете потерять часть или все свои первоначальные инвестиции, и поэтому вы не должны вкладывать деньги, которые вы не можете позволить себе потерять. Вы должны осознавать все риски, связанные с торговлей на финансовых рынках, и при необходимости обращаться за советом к независимому финансовому консультанту.</p>
+      
+      <p><strong>Основные риски включают:</strong></p>
+      <ul>
+        <li>Рыночный риск — возможность потерь из-за неблагоприятных изменений рыночных цен</li>
+        <li>Кредитный риск — риск того, что контрагент не выполнит свои обязательства</li>
+        <li>Ликвидностный риск — риск невозможности быстро закрыть позицию по приемлемой цене</li>
+        <li>Операционный риск — риск потерь из-за сбоев в системах, процессах или человеческих ошибок</li>
+      </ul>
+    `;
+    
+    const documentContent3 = `
+      <h3>Политика противодействия отмыванию денег</h3>
+      <p>GlobalInvest придерживается строгих стандартов в области противодействия отмыванию денег (AML) и финансированию терроризма (CFT) в соответствии с международными требованиями и законодательством юрисдикций, в которых мы работаем.</p>
+      
+      <p><strong>Идентификация клиентов</strong></p>
+      <p>Мы проводим процедуру "Знай своего клиента" (KYC) для всех клиентов, которая включает:</p>
+      <ul>
+        <li>Подтверждение личности с помощью официальных документов</li>
+        <li>Проверку места жительства</li>
+        <li>Оценку источника средств</li>
+        <li>Определение финансового профиля и инвестиционных целей</li>
+      </ul>
+      
+      <p><strong>Мониторинг операций</strong></p>
+      <p>Мы осуществляем постоянный мониторинг всех операций клиентов с целью выявления подозрительной активности, включая:</p>
+      <ul>
+        <li>Необычно крупные операции</li>
+        <li>Частые операции без очевидной экономической цели</li>
+        <li>Операции с высокорисковыми юрисдикциями</li>
+        <li>Попытки обойти процедуры проверки</li>
+      </ul>
+      
+      <p>При выявлении подозрительной активности мы оставляем за собой право заблокировать счет и сообщить о ней в соответствующие регулирующие органы.</p>
+    `;
+    
+    const documentContent4 = `
+      <h3>Политика в отношении конфликта интересов</h3>
+      <p>GlobalInvest признает, что в ходе своей деятельности могут возникать ситуации, когда интересы компании, ее сотрудников или аффилированных лиц могут вступать в конфликт с интересами клиентов, или когда интересы одного клиента могут вступать в конфликт с интересами другого клиента.</p>
+      
+      <p><strong>Идентификация конфликтов интересов</strong></p>
+      <p>Мы идентифицируем следующие потенциальные источники конфликта интересов:</p>
+      <ul>
+        <li>Компания или связанное с ней лицо может получать выгоду от клиентских операций</li>
+        <li>Сотрудники могут иметь личные интересы, влияющие на их профессиональные обязанности</li>
+        <li>Компания может получать комиссионные или другие выплаты от третьих лиц</li>
+        <li>Компания может выступать контрагентом в сделке с клиентом</li>
+      </ul>
+    `;
+    
+    const documentContent5 = `
+      <h3>Политика вывода и возврата средств</h3>
+      <p>GlobalInvest стремится к прозрачности и оперативности при обработке запросов на вывод средств. Настоящая политика описывает процедуры и условия вывода средств с торговых счетов клиентов.</p>
+      
+      <p><strong>Общие условия</strong></p>
+      <ul>
+        <li>Вывод средств возможен только на те платежные системы и банковские счета, которые были использованы для пополнения</li>
+        <li>Минимальная сумма вывода составляет $50 (или эквивалент в другой валюте)</li>
+        <li>Срок обработки запросов на вывод - до 3 рабочих дней</li>
+        <li>Компания оставляет за собой право запросить дополнительные документы для верификации</li>
+      </ul>
+      
+      <p><strong>Комиссии</strong></p>
+      <p>Компания не взимает комиссию за вывод средств, однако платежные системы могут применять свои тарифы.</p>
+      
+      <p><strong>Возврат средств</strong></p>
+      <p>Возврат средств возможен в течение 14 дней с момента открытия счета при условии отсутствия торговой активности.</p>
+    `;
+    const documentContent6 = `
+<strong>GlobalInvest</strong> — закрытый инвестиционный клуб для тех, кто ценит уверенность в завтрашнем дне и высокий уровень финансовой архитектуры. Мы сопровождаем капитал клиентов в условиях любой рыночной волатильности, сохраняя стратегическую устойчивость и максимальную приватность.
+⠀
+Наша философия — это точность, глубина анализа и внимание к деталям. Здесь не предлагают шаблонных решений: каждый портфель — результат персональной работы команды аналитиков, управляющих и юристов.
+⠀
+Вы работаете не с сервисом — вы работаете с людьми, которые ставят вашу финансовую цель на первое место.
+⠀
+GlobalInvest — когда инвестиции становятся искусством управления будущим.
+    `;
+  </script>
+</body>
+</html>

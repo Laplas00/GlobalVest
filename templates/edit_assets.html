@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактирование активов</title>
+</head>
+<body>
+    <h2>🛠 Редактирование активов для пользователя #{{ user_id }}</h2>
+    <form method="POST">
+        {% for asset in all_assets %}
+            <div>
+                <label>{{ asset[1] }}:</label>
+                <input type="number" step="0.01" name="{{ asset[0] }}" value="{{ user_assets.get(asset[0], 0) }}">
+            </div>
+        {% endfor %}
+        <br>
+        <button type="submit">💾 Сохранить</button>
+    </form>
+</body>
+</html>

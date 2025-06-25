@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Админ-панель</title>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --text: #212529;
+      --card-bg: #ffffff;
+      --border: #dee2e6;
+      --accent: #28a745;
+      --hover: #218838;
+    }
+    body.dark-mode {
+      --bg: #121212;
+      --text: #f1f1f1;
+      --card-bg: #1e1e1e;
+      --border: #444;
+      --hover: #34c759;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 40px;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    h1, h2, h4 {
+      margin-top: 30px;
+    }
+    .block, .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table th, table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: left;
+    }
+    form.inline {
+      display: inline-block;
+      margin-top: 8px;
+    }
+    input, select, button {
+      padding: 6px 8px;
+      font-size: 14px;
+      margin-right: 5px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--card-bg);
+      color: var(--text);
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: var(--hover);
+    }
+    input[type="file"] {
+      background: none;
+    }
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 40px 0;
+    }
+    img {
+      max-width: 120px;
+      display: block;
+      margin: 10px 0;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    #admin-chat-fab {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1200;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--hover));
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 24px rgba(40,167,69,0.18);
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+    #admin-chat-fab:hover {
+      background: linear-gradient(135deg, var(--hover), var(--accent));
+      box-shadow: 0 8px 32px rgba(40,167,69,0.28);
+      transform: scale(1.08);
+    }
+    @media (max-width: 600px) {
+      #admin-chat-fab {
+        right: 16px;
+        bottom: 16px;
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+  <h1>Админ-панель</h1>
+
+  <div class="card">
+    <h2>Пользователи</h2>
+    <table>
+      <tr>
+        <th>ID</th><th>Имя</th><th>Email</th><th>Баланс</th><th>Активы</th><th>Действия</th>
+      </tr>
+      {% for user in users %}
+      <tr>
+        <td>{{ user[0] }}</td>
+        <td>{{ user[1] }} {{ user[2] }}</td>
+        <td>{{ user[3] }}</td>
+        <td>
+          ${{ user[4] }}
+          <form class="inline" method="POST" action="/admin/update_balance">
+            <input type="hidden" name="user_id" value="{{ user[0] }}">
+            <input type="number" step="0.01" name="balance" placeholder="Баланс">
+            <button type="submit">Обновить</button>
+          </form>
+        </td>
+        <td>
+          <form method="POST" action="/admin/grant_asset" class="inline">
+            <input type="hidden" name="user_id" value="{{ user[0] }}">
+            <select name="asset_id">
+              {% for asset in all_assets %}
+              <option value="{{ asset[0] }}">{{ asset[1] }}</option>
+              {% endfor %}
+            </select>
+            <input type="number" step="0.01" name="amount" placeholder="Кол-во" required>
+            <button type="submit">Выдать</button>
+          </form>
+        </td>
+        <td>
+          <form method="POST" action="/admin/delete_user" class="inline">
+            <input type="hidden" name="user_id" value="{{ user[0] }}">
+            <button onclick="return confirm('Удалить пользователя?')">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Добавить новый актив</h2>
+    <form action="/admin/create_asset" method="post" enctype="multipart/form-data">
+      <label>Название:</label>
+      <input type="text" name="name" required>
+      <label>Текущая цена:</label>
+      <input type="number" step="0.01" name="current_value" required>
+      <label>Изображение:</label>
+      <input type="file" name="image" accept="image/*" required>
+      <button type="submit">Создать</button>
+    </form>
+  </div>
+
+  <h2>Список активов</h2>
+  {% for asset in assets %}
+  <div class="block">
+    <strong>{{ asset[1] }}</strong> — текущая цена: ${{ asset[2] }}
+    {% if asset[3] %}<img src="/{{ asset[3] }}" alt="Изображение">{% endif %}
+
+    <form method="POST" action="/admin/update_price" class="inline">
+      <input type="hidden" name="asset_id" value="{{ asset[0] }}">
+      <input type="number" name="new_price" step="0.01" placeholder="Новая цена" required>
+      <button type="submit">Обновить цену</button>
+    </form>
+
+    <form method="POST" action="/admin/rename_asset" class="inline">
+      <input type="hidden" name="asset_id" value="{{ asset[0] }}">
+      <input type="text" name="new_name" placeholder="Новое имя" required>
+      <button type="submit">Переименовать</button>
+    </form>
+
+    <form method="POST" action="/admin/delete_asset" class="inline" onsubmit="return confirm('Удалить актив?')">
+      <input type="hidden" name="asset_id" value="{{ asset[0] }}">
+      <button>Удалить</button>
+    </form>
+
+    <h4>История цен</h4>
+    <ul>
+      {% for price in asset_prices.get(asset[0], []) %}
+      <li>
+        {{ price[2] }} — ${{ price[3] }}
+        <form method="POST" action="/admin/edit_price_history" class="inline">
+          <input type="hidden" name="id" value="{{ price[0] }}">
+          <input type="datetime-local" name="timestamp" value="{{ price[2]|replace(' ', 'T') }}" required>
+          <input type="number" name="value" step="0.01" value="{{ price[3] }}" required>
+          <button>💾</button>
+        </form>
+        <form method="POST" action="/admin/delete_price_history" class="inline">
+          <input type="hidden" name="id" value="{{ price[0] }}">
+          <button>🗑️</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <form method="POST" action="/admin/add_price_history">
+      <input type="hidden" name="asset_id" value="{{ asset[0] }}">
+      <input type="datetime-local" name="timestamp" required>
+      <input type="number" step="0.01" name="value" placeholder="Цена" required>
+      <button>Добавить</button>
+    </form>
+  </div>
+  {% endfor %}
+
+  <button id="admin-chat-fab" title="Чат с пользователем">💬</button>
+
+  <div class="card" id="admin-chat" style="display:none;">
+    <h2 style="margin-top:0;">Чат с пользователем</h2>
+    <form id="user-search-form" style="margin-bottom:10px; display:flex; gap:8px; align-items:center;">
+      <label for="user-search-input">Поиск пользователя:</label>
+      <input type="text" id="user-search-input" placeholder="Имя или ID" style="flex:1; padding:6px 8px; border-radius:6px;">
+      <select id="user-select" style="padding:6px 8px; border-radius:6px; min-width:180px;">
+        <option value="">-- выберите --</option>
+        {% for user in users %}
+        <option value="{{ user[0] }}">{{ user[1] }} {{ user[2] }} (ID: {{ user[0] }})</option>
+        {% endfor %}
+      </select>
+    </form>
+    <div id="admin-chat-messages" style="height: 250px; overflow-y: auto; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 10px;"></div>
+    <form id="admin-chat-form" style="display:flex; gap:8px;">
+      <input type="text" id="admin-chat-input" placeholder="Введите сообщение..." style="flex:1; padding:8px; border-radius:6px; border:1px solid var(--border);">
+      <button type="submit" style="background:var(--accent); color:#fff; border:none; border-radius:6px; padding:8px 16px;">Отправить</button>
+    </form>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').textContent =
+        document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    }
+
+    (function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle').textContent = '☀️';
+      }
+    })();
+
+    function escapeHtml(text) {
+      var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+    let selectedUser = '';
+    const userSearchInput = document.getElementById('user-search-input');
+    const userSelect = document.getElementById('user-select');
+    userSearchInput.addEventListener('input', function() {
+      const q = this.value.trim();
+      if (!q) return;
+      fetch(`/admin/search_users?q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(users => {
+          if (users.length === 1) {
+            userSelect.innerHTML = `<option value="${users[0].id}">${users[0].first_name} ${users[0].last_name} (ID: ${users[0].id})</option>`;
+            userSelect.value = users[0].id;
+            selectedUser = users[0].id;
+            loadAdminMessages();
+          } else if (users.length > 1) {
+            userSelect.innerHTML = '<option value="">-- выберите --</option>' +
+              users.map(u => `<option value="${u.id}">${u.first_name} ${u.last_name} (ID: ${u.id})</option>`).join('');
+            userSelect.value = '';
+          } else {
+            userSelect.innerHTML = '<option value="">Пользователь не найден</option>';
+          }
+        });
+    });
+    userSelect.onchange = function() {
+      if (this.value) {
+        selectedUser = this.value;
+        loadAdminMessages();
+      }
+    };
+    userSelect.onclick = function() {
+      if (this.value) {
+        selectedUser = this.value;
+        loadAdminMessages();
+      }
+    };
+    function loadAdminMessages() {
+      if (!selectedUser) { document.getElementById('admin-chat-messages').innerHTML = '<i>Выберите пользователя</i>'; return; }
+      fetch('/admin/chat/' + selectedUser).then(r=>r.json()).then(data=>{
+        const box = document.getElementById('admin-chat-messages');
+        box.innerHTML = data.map(m => `<div style='margin-bottom:8px;'><b style='color:${m.sender==='admin'?'var(--accent)':'var(--accent-secondary)'}'>${m.sender==='admin'?'Админ':'Пользователь'}:</b> <span>${escapeHtml(m.message)}</span></div>`).join('');
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+    document.getElementById('admin-chat-form').onsubmit = function(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-chat-input');
+      const msg = input.value.trim();
+      if (!msg || !selectedUser) return;
+      fetch('/admin/chat/send', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:selectedUser,message:msg})}).then(()=>{
+        input.value='';
+        loadAdminMessages();
+      });
+    };
+    setInterval(loadAdminMessages, 2000);
+
+    const adminChatFab = document.getElementById('admin-chat-fab');
+    const adminChatWindow = document.getElementById('admin-chat');
+    adminChatFab.onclick = () => {
+      adminChatWindow.style.display = adminChatWindow.style.display === 'none' ? 'block' : 'none';
+      if(adminChatWindow.style.display === 'block') loadAdminMessages();
+    };
+  </script>
+</body>
+</html>

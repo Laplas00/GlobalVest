@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>GlobalInvest — Личный кабинет</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="static/css/dashboard.css"> 
+</head>
+<body data-theme="dark">
+  <script>
+    // Удаление через 5 секунд
+    document.addEventListener("DOMContentLoaded", () => {
+      const flash = document.querySelector(".flash-message");
+      if (flash) {
+        setTimeout(() => {
+          flash.style.opacity = '0';
+          setTimeout(() => flash.remove(), 500);
+        }, 5000);
+      }
+    });
+  </script>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="flash-message" onclick="this.remove()">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+
+  <!-- Градиентный фон -->
+  <div class="gradient-bg"></div>
+  
+  <!-- Частицы -->
+  <div id="particles-js"></div>
+  
+  <!-- Шапка -->
+  <header id="header">
+    <div class="logo">
+      <span class="logo-icon">📈</span>
+      GlobalInvest
+    </div>
+    
+    <nav class="nav-links">
+      <a href="/">Главная</a>
+      <a href="#balance">Баланс</a>
+      <a href="#assets">Активы</a>
+      <a href="/logout">Выйти</a>
+      <button id="support-chat-toggle" class="btn btn-primary" style="margin-left:10px;">Чат поддержки</button>
+    </nav>
+    
+    <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+  </header>
+  
+  <!-- Основное содержимое -->
+  <main class="main-content">
+    <!-- Приветствие -->
+    <section class="welcome-section">
+      <h1>Добро пожаловать, {{ first_name }}!</h1>
+      <p>Ваш личный кабинет предоставляет полный контроль над инвестициями. Здесь вы можете отслеживать баланс, управлять активами и совершать сделки.</p>
+    </section>
+    
+    <!-- Баланс -->
+    <section id="balance" class="balance-section">
+      <div class="balance-card">
+        <div class="balance-info">
+          <h2>Ваш баланс</h2>
+          <h1>${{ balance }}</h1>
+        </div>
+        <div class="balance-actions">
+          <button onclick="openModal('deposit')" class="btn btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+            Пополнить
+          </button>
+          <button onclick="openModal('withdraw')" class="btn btn-secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+            Вывести
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Активы -->
+    <section id="assets" class="assets-section">
+      <h2>Активы</h2>
+      
+      <div class="assets-grid">
+        <!-- Актив 1 -->
+        {% for asset in assets %}
+        <div class="asset-card" data-delay="0">
+          <div class="asset-header">
+            <div class="asset-icon">
+              <img src="{{ asset[2] }}" height="50px">
+            </div>
+            <div>
+              <div class="asset-name">{{ asset[0] }}</div>
+            </div>
+          </div>
+          <div class="asset-details">
+            <div class="asset-row">
+              <span class="asset-label">Текущая цена:</span>
+              <span class="asset-value">{{ asset[1] }}</span>
+            </div>
+            <!-- <div class="asset-row"> -->
+            <!--   <span class="asset-label">В вашем портфеле:</span> -->
+            <!--   <span class="asset-value"></span> -->
+            <!-- </div> -->
+            <div class="asset-row">
+              <span class="asset-label">Активность графиков:</span>
+              <span class="asset-value">Активен</span>
+            </div>
+            <div class="asset-row">
+              <span class="asset-label"></span>
+              <span class="asset-value" style="color: var(--accent-primary)"></span>
+            </div>
+          </div>
+          <div class="asset-actions">
+            <a class="asset-btn sell" href="{{ url_for('view_asset', asset_name=asset[0]) }}">Посмотреть график</a>
+          </div>
+          <div class="asset-actions" style="margin-top: 20px;"> 
+
+            <form method="post" action="{{ url_for('toggle_asset') }}">
+              <input type="hidden" name="asset_name" value="{{asset[0]}}">
+              <input type="hidden" name="asset_price" value="{{asset[1]}}">
+              <div style='display: relative;'>
+                 <button type="submit" class="asset-btn sell" style="width: 100%;">
+                  {% if asset[0] in user_assets.keys() %}
+                    <input type="hidden" name="action" value='sell'> 
+                    Продать
+                  {% else %}
+                    <input type="hidden" name="action" value='buy'>
+                    Купить
+                  {% endif %}
+                </button>
+
+                <input 
+                  name="asset_amount" 
+                  style="20%"
+                  type="number"
+                  placeholder="0"
+                  required> 
+              </div> 
+            </form>  
+          </div>
+
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+  
+  <!-- Модальное окно для депозита -->
+  <div id="depositModal" class="modal-overlay">
+    <div class="modal-container">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <div class="modal-header">
+        <h3>Пополнение счета</h3>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Сумма пополнения ($)</label>
+          <input type="number" class="form-input" id="depositAmount" min="100" step="0.01" placeholder="1000.00">
+          <div class="error-message" id="depositError">Пожалуйста, введите сумму больше 100$</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Способ оплаты</label>
+          <select class="form-input">
+            <option>Банковская карта</option>
+            <option>Криптовалюта</option>
+            <option>Электронный кошелек</option>
+            <option>Банковский перевод</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        <button class="btn btn-primary" onclick="confirmDeposit()">Пополнить</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Модальное окно для вывода -->
+  <div id="withdrawModal" class="modal-overlay">
+    <div class="modal-container">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <div class="modal-header">
+        <h3>Вывод средств</h3>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Сумма вывода ($)</label>
+          <input type="number" class="form-input" id="withdrawAmount" min="100" step="0.01" placeholder="1000.00">
+          <div class="error-message" id="withdrawError">Пожалуйста, введите сумму больше 100$</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Реквизиты для вывода</label>
+          <textarea class="form-input form-textarea" id="withdrawDetails" placeholder="Номер карты/счета, адрес кошелька и т.д."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        <button class="btn btn-primary" onclick="confirmWithdraw()">Вывести</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Модальное окно для покупки/продажи -->
+  <div id="tradeModal" class="modal-overlay">
+    <div class="modal-container">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <div class="modal-header">
+        <h3 id="tradeModalTitle">Покупка акций</h3>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Актив</label>
+          <input type="text" class="form-input" id="tradeAsset" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Текущая цена</label>
+          <input type="text" class="form-input" id="tradePrice" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="tradeAmountLabel">Количество для покупки</label>
+          <input type="number" class="form-input" id="tradeAmount" min="1" step="1" placeholder="10">
+          <div class="error-message" id="tradeError">Пожалуйста, введите корректное количество</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Общая стоимость</label>
+          <input type="text" class="form-input" id="tradeTotal" readonly>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        <button class="btn btn-primary" onclick="confirmTrade()" id="tradeConfirmBtn">Купить</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Уведомление -->
+  <div class="notification" id="notification">
+    <div class="notification-icon">✓</div>
+    <div class="notification-content">
+      <h4 id="notificationTitle">Успешно!</h4>
+      <p id="notificationMessage">Ваша операция выполнена успешно.</p>
+    </div>
+    <div class="notification-close" onclick="hideNotification()">×</div>
+  </div>
+  
+  <!-- Чат с поддержкой, изначально скрыт -->
+  <div class="card" id="support-chat">
+    <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+      <h2 style="margin: 0 auto; text-align: center; flex:1;">Чат с поддержкой</h2>
+      <button id="close-chat" style="position: absolute; right: 0;">&times;</button>
+    </div>
+    <div id="chat-messages"></div>
+    <form id="chat-form">
+      <input type="text" id="chat-input" placeholder="Введите сообщение...">
+      <button type="submit">Отправить</button>
+    </form>
+  </div>
+  
+  <!-- Скрипты -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    // Переключение темы
+    function toggleTheme() {
+      const body = document.body;
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+    
+    // Проверка сохранённой темы
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.setAttribute('data-theme', 'light');
+    }
+    
+    // Плавное появление элементов при скролле
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.asset-card').forEach((el) => {
+      observer.observe(el);
+    });
+    
+    // Фиксация шапки при скролле
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('header');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+    
+    // Управление модальными окнами
+    function openModal(type, asset = null) {
+      closeModal(); // Закрыть все открытые модалки
+      
+      if (type === 'deposit') {
+        document.getElementById('depositModal').style.display = 'flex';
+        document.getElementById('depositAmount').focus();
+      } else if (type === 'withdraw') {
+        document.getElementById('withdrawModal').style.display = 'flex';
+        document.getElementById('withdrawAmount').focus();
+      } else if (type === 'buy' || type === 'sell') {
+        const modal = document.getElementById('tradeModal');
+        document.getElementById('tradeModalTitle').textContent = type === 'buy' ? `Покупка ${asset}` : `Продажа ${asset}`;
+        document.getElementById('tradeAsset').value = asset;
+        
+        // Установка цены в зависимости от актива (это можно заменить реальными данными)
+        let price = 0;
+        if (asset === 'AAPL') price = 178.72;
+        else if (asset === 'TSLA') price = 699.20;
+        else if (asset === 'GLD') price = 168.45;
+        else if (asset === 'BTC') price = 42350.00;
+        
+        document.getElementById('tradePrice').value = `$${price.toFixed(2)}`;
+        document.getElementById('tradeAmountLabel').textContent = type === 'buy' ? 'Количество для покупки' : 'Количество для продажи';
+        document.getElementById('tradeConfirmBtn').textContent = type === 'buy' ? 'Купить' : 'Продать';
+        
+        // Обработчик изменения количества
+        document.getElementById('tradeAmount').oninput = function() {
+          const amount = parseFloat(this.value) || 0;
+          const total = amount * price;
+          document.getElementById('tradeTotal').value = total > 0 ? `$${total.toFixed(2)}` : '';
+        };
+        
+        modal.style.display = 'flex';
+        document.getElementById('tradeAmount').focus();
+      }
+    }
+    
+    function closeModal() {
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.style.display = 'none';
+      });
+    }
+    
+    // Подтверждение операций
+    function confirmDeposit() {
+      const amount = parseFloat(document.getElementById('depositAmount').value);
+      const error = document.getElementById('depositError');
+      
+      if (!amount || amount < 100) {
+        error.style.display = 'block';
+        return;
+      }
+      
+      error.style.display = 'none';
+      closeModal();
+      showNotification('Пополнение счета', `Запрос на пополнение на $${amount.toFixed(2)} отправлен на обработку.`);
+    }
+    
+    function confirmWithdraw() {
+      const amount = parseFloat(document.getElementById('withdrawAmount').value);
+      const details = document.getElementById('withdrawDetails').value;
+      const error = document.getElementById('withdrawError');
+      
+      if (!amount || amount < 100 || !details) {
+        error.textContent = !details ? 'Пожалуйста, укажите реквизиты' : 'Пожалуйста, введите сумму больше 100$';
+        error.style.display = 'block';
+        return;
+      }
+      
+      error.style.display = 'none';
+      closeModal();
+      showNotification('Вывод средств', `Запрос на вывод $${amount.toFixed(2)} отправлен на обработку.`);
+    }
+    
+    function confirmTrade() {
+      const amount = parseInt(document.getElementById('tradeAmount').value);
+      const error = document.getElementById('tradeError');
+      
+      if (!amount || amount < 1) {
+        error.style.display = 'block';
+        return;
+      }
+      
+      error.style.display = 'none';
+      closeModal();
+      const action = document.getElementById('tradeConfirmBtn').textContent.toLowerCase();
+      const asset = document.getElementById('tradeAsset').value;
+      showNotification('Торговая операция', `${action} ${amount} ${asset} выполнена успешно.`);
+    }
+    
+    // Уведомления
+    function showNotification(title, message) {
+      const notification = document.getElementById('notification');
+      document.getElementById('notificationTitle').textContent = title;
+      document.getElementById('notificationMessage').textContent = message;
+      
+      notification.classList.add('show');
+      
+      // Автоматическое скрытие через 5 секунд
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 5000);
+    }
+    
+    function hideNotification() {
+      document.getElementById('notification').classList.remove('show');
+    }
+    
+    // Частицы
+    particlesJS('particles-js', {
+      "particles": {
+        "number": {
+          "value": 80,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#00e676"
+        },
+        "shape": {
+          "type": "circle",
+          "stroke": {
+            "width": 0,
+            "color": "#000000"
+          },
+          "polygon": {
+            "nb_sides": 5
+          }
+        },
+        "opacity": {
+          "value": 0.5,
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 1,
+            "opacity_min": 0.1,
+            "sync": false
+          }
+        },
+        "size": {
+          "value": 3,
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 2,
+            "size_min": 0.1,
+            "sync": false
+          }
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#00e676",
+          "opacity": 0.2,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 1,
+          "direction": "none",
+          "random": true,
+          "straight": false,
+          "out_mode": "out",
+          "bounce": false,
+          "attract": {
+            "enable": true,
+            "rotateX": 600,
+            "rotateY": 1200
+          }
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "grab"
+          },
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          },
+          "resize": true
+        },
+        "modes": {
+          "grab": {
+            "distance": 140,
+            "line_linked": {
+              "opacity": 0.5
+            }
+          },
+          "push": {
+            "particles_nb": 4
+          }
+        }
+      },
+      "retina_detect": true
+    });
+
+    // Управление чатом
+    const chatToggle = document.getElementById('support-chat-toggle');
+    const chatWindow = document.getElementById('support-chat');
+    const closeChatBtn = document.getElementById('close-chat');
+
+    chatToggle.onclick = () => {
+      chatWindow.classList.toggle('is-open');
+      if(chatWindow.classList.contains('is-open')) {
+        loadMessages();
+      }
+    };
+    closeChatBtn.onclick = () => {
+        chatWindow.classList.remove('is-open');
+    };
+    function formatTime(isoString) {
+        if (!isoString) return '';
+        try {
+            return new Date(isoString).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+        } catch(e) { return ''; }
+    }
+
+    function escapeHtml(text) {
+      var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    function loadMessages() {
+      fetch('/chat/messages').then(r=>r.json()).then(data=>{
+        const box = document.getElementById('chat-messages');
+        if (!data.length) {
+          box.innerHTML = '<div style="color:#aaa;text-align:center;">Нет сообщений</div>';
+          return;
+        }
+        box.innerHTML = data.map(m => `
+            <div class="chat-bubble ${m.sender === 'user' ? 'user' : 'admin'}">
+                <span>${escapeHtml(m.message)}</span>
+                <span class="timestamp">${formatTime(m.timestamp)}</span>
+            INTO messages</div>
+        `).join('');
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+    document.getElementById('chat-form').onsubmit = function(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+      fetch('/chat/send', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})})
+        .then(()=>{
+          input.value='';
+          setTimeout(loadMessages, 100); // Гарантированно обновить после отправки
+        });
+    };
+    setInterval(loadMessages, 2000);
+    loadMessages();
+  </script>
+</body>
+</html>

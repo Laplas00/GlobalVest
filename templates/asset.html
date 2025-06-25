@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ asset_name }} — График цен</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+  <style>
+    :root {
+      --bg-dark: #0a0a0a;
+      --bg-light: #f8f8f8;
+      --text-dark: #ffffff;
+      --text-light: #121212;
+      --accent-primary: #00e676;
+      --accent-secondary: #00b0ff;
+      --card-bg-dark: rgba(20, 20, 20, 0.8);
+      --card-bg-light: rgba(255, 255, 255, 0.9);
+      --border-dark: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --error-color: #ff5252;
+      --success-color: #4caf50;
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --text: var(--text-dark);
+      --card-bg: var(--card-bg-dark);
+      --border: var(--border-dark);
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --text: var(--text-light);
+      --card-bg: var(--card-bg-light);
+      --border: var(--border-light);
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      scroll-behavior: smooth;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      line-height: 1.6;
+    }
+
+    /* Градиентный фон с анимацией */
+    .gradient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      background-size: 400% 400%;
+      animation: gradientFlow 15s ease infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Частицы */
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Шапка */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 5%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.5);
+      backdrop-filter: blur(15px);
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.4s ease;
+    }
+
+    header.scrolled {
+      padding: 15px 5%;
+      background: rgba(10, 10, 10, 0.9);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 24px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    .logo-icon {
+      margin-right: 10px;
+      font-size: 28px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent-primary);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(30deg);
+    }
+
+    /* Основное содержимое */
+    .main-content {
+      padding: 180px 5% 60px;
+    }
+
+    /* Карточки */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 15px 35px var(--shadow);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      transition: all 0.4s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 230, 118, 0.2);
+    }
+
+    /* Заголовки */
+    h1, h2, h3 {
+      margin-top: 0;
+      color: var(--text);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+
+    /* Кнопки */
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      color: #000;
+      box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 230, 118, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--accent-primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 230, 118, 0.1);
+      transform: translateY(-3px);
+    }
+
+    /* График */
+    .chart-container {
+      width: 95%;
+      height: 500px;
+      position: relative;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Диапазоны времени */
+    .range-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .range-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .range-btn:hover, .range-btn.active {
+      background: var(--accent-primary);
+      color: #000;
+      border-color: var(--accent-primary);
+    }
+
+    /* Кнопка назад */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 30px;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      gap: 12px;
+      color: var(--accent-secondary);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 100px 5% 40px;
+      }
+
+      .chart-container {
+        height: 400px;
+      }
+
+      .range-buttons {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 130px 3% 30px;
+      }
+
+      .chart-container {
+        height: 300px;
+      }
+
+      .range-buttons {
+        flex-direction: column;
+      }
+
+      .range-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <!-- Градиентный фон -->
+  <div class="gradient-bg"></div>
+  
+  <!-- Частицы -->
+  <div id="particles-js"></div>
+  
+  <!-- Шапка -->
+  <header id="header">
+    <div class="logo">
+      <span class="logo-icon">📈</span>
+      GlobalInvest
+    </div>
+    
+    <nav class="nav-links">
+      <a href="/">Главная</a>
+      <a href="/dashboard">Кабинет</a>
+      <a href="#chart">График</a>
+      <a href="#controls">Управление</a>
+    </nav>
+    
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </header>
+  
+  <!-- Основное содержимое -->
+  <main class="main-content">
+    <a href="{{ url_for('dashboard') }}" class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Назад в кабинет
+    </a>
+
+    <div class="card">
+      <h1>{{ asset_name }}</h1>
+      <h2>Текущая цена:</h2>
+      <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {
+          "symbol": "BINANCE:{{asset_name}}",
+        "colorTheme": "dark",
+        "isTransparent": true,
+        "locale": "en",
+        "width": 350
+      }
+        </script>
+      </div>
+  <!-- TradingView Widget END -->${{ current_value }}
+    </div>
+
+
+<div class="card" id="controls">
+  <div class="range-buttons">
+    <button class="range-btn active" onclick="setGraph('1min')">1 minutes</button>
+    <button class="range-btn" onclick="setGraph('3min')">3 minutes</button>
+    <button class="range-btn" onclick="setGraph('5min')">5 minutes</button>
+
+    <button class="range-btn" onclick="setGraph('1h')">1 hour</button>
+    <button class="range-btn" onclick="setGraph('2h')">2 hours</button>
+    <button class="range-btn" onclick="setGraph('3h')">3 hours</button>
+
+    <button class="range-btn" onclick="setGraph('1d')">1 day</button>
+    <button class="range-btn" onclick="setGraph('7d')">1 week</button>
+  </div>
+</div>
+
+<!-- Блоки, которые переключаются -->
+  <div class="card chart-container" id="view-1min">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+      "allow_symbol_change": false,
+      "calendar": false,
+      "details": false,
+      "hide_side_toolbar": true,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "hide_volume": false,
+      "hotlist": false,
+      "interval": "1",
+      "locale": "en",
+      "save_image": false,
+      "style": "1",
+          "symbol": "BINANCE:{{asset_name}}",
+      "theme": "dark",
+      "timezone": "Etc/UTC",
+      "backgroundColor": "#0F0F0F",
+      "gridColor": "rgba(242, 242, 242, 0.06)",
+      "watchlist": [],
+      "withdateranges": false,
+      "compareSymbols": [],
+      "studies": [],
+      "autosize": true
+    }
+      </script>
+    </div>
+  </div>
+
+  <div class="card chart-container hidden" id="view-3min">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+      "allow_symbol_change": false,
+      "calendar": false,
+      "details": false,
+      "hide_side_toolbar": true,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "hide_volume": false,
+      "hotlist": false,
+      "interval": "3",
+      "locale": "en",
+      "save_image": false,
+      "style": "1",
+          "symbol": "BINANCE:{{asset_name}}",
+      "theme": "dark",
+      "timezone": "Etc/UTC",
+      "backgroundColor": "#0F0F0F",
+      "gridColor": "rgba(242, 242, 242, 0.06)",
+      "watchlist": [],
+      "withdateranges": false,
+      "compareSymbols": [],
+      "studies": [],
+      "autosize": true
+    }
+      </script>
+    </div>
+
+  </div>
+  <div class="card chart-container hidden" id="view-5min">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+      "allow_symbol_change": false,
+      "calendar": false,
+      "details": false,
+      "hide_side_toolbar": true,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "hide_volume": false,
+      "hotlist": false,
+      "interval": "5",
+      "locale": "en",
+      "save_image": false,
+      "style": "1",
+          "symbol": "BINANCE:{{asset_name}}",
+      "theme": "dark",
+      "timezone": "Etc/UTC",
+      "backgroundColor": "#0F0F0F",
+      "gridColor": "rgba(242, 242, 242, 0.06)",
+      "watchlist": [],
+      "withdateranges": false,
+      "compareSymbols": [],
+      "studies": [],
+      "autosize": true
+    }
+      </script>
+    </div>
+  </div>
+
+  <div class="card chart-container hidden" id="view-1h">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+      "allow_symbol_change": false,
+      "calendar": false,
+      "details": false,
+      "hide_side_toolbar": true,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "hide_volume": false,
+      "hotlist": false,
+      "interval": "60",
+      "locale": "en",
+      "save_image": false,
+      "style": "1",
+          "symbol": "BINANCE:{{asset_name}}",
+      "theme": "dark",
+      "timezone": "Etc/UTC",
+      "backgroundColor": "#0F0F0F",
+      "gridColor": "rgba(242, 242, 242, 0.06)",
+      "watchlist": [],
+      "withdateranges": false,
+      "compareSymbols": [],
+      "studies": [],
+      "autosize": true
+    }
+      </script>
+    </div>
+  </div>
+  <div class="card chart-container hidden" id="view-2h">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+      "allow_symbol_change": false,
+      "calendar": false,
+      "details": false,
+      "hide_side_toolbar": true,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "hide_volume": false,
+      "hotlist": false,
+      "interval": "120",
+      "locale": "en",
+      "save_image": false,
+      "style": "1",
+          "symbol": "BINANCE:{{asset_name}}",
+      "theme": "dark",
+      "timezone": "Etc/UTC",
+      "backgroundColor": "#0F0F0F",
+      "gridColor": "rgba(242, 242, 242, 0.06)",
+      "watchlist": [],
+      "withdateranges": false,
+      "compareSymbols": [],
+      "studies": [],
+      "autosize": true
+    }
+      </script>
+    </div>
+
+  </div>
+  <div class="card chart-container hidden" id="view-3h">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+      "allow_symbol_change": false,
+      "calendar": false,
+      "details": false,
+      "hide_side_toolbar": true,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "hide_volume": false,
+      "hotlist": false,
+      "interval": "180",
+      "locale": "en",
+      "save_image": false,
+      "style": "1",
+          "symbol": "BINANCE:{{asset_name}}",
+      "theme": "dark",
+      "timezone": "Etc/UTC",
+      "backgroundColor": "#0F0F0F",
+      "gridColor": "rgba(242, 242, 242, 0.06)",
+      "watchlist": [],
+      "withdateranges": false,
+      "compareSymbols": [],
+      "studies": [],
+      "autosize": true
+    }
+      </script>
+    </div>
+  </div>
+  <div class="card chart-container hidden" id="view-1d">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+      "allow_symbol_change": false,
+      "calendar": false,
+      "details": false,
+      "hide_side_toolbar": true,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "hide_volume": false,
+      "hotlist": false,
+      "interval": "D",
+      "locale": "en",
+      "save_image": false,
+      "style": "1",
+          "symbol": "BINANCE:{{asset_name}}",
+      "theme": "dark",
+      "timezone": "Etc/UTC",
+      "backgroundColor": "#0F0F0F",
+      "gridColor": "rgba(242, 242, 242, 0.06)",
+      "watchlist": [],
+      "withdateranges": false,
+      "compareSymbols": [],
+      "studies": [],
+      "autosize": true
+    }
+      </script>
+    </div>
+  </div>
+
+  <div class="card chart-container hidden" id="view-7d">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+      {
+      "allow_symbol_change": false,
+      "calendar": false,
+      "details": false,
+      "hide_side_toolbar": true,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "hide_volume": false,
+      "hotlist": false,
+      "interval": "W",
+      "locale": "en",
+      "save_image": false,
+      "style": "1",
+          "symbol": "BINANCE:{{asset_name}}",
+      "theme": "dark",
+      "timezone": "Etc/UTC",
+      "backgroundColor": "#0F0F0F",
+      "gridColor": "rgba(242, 242, 242, 0.06)",
+      "watchlist": [],
+      "withdateranges": false,
+      "compareSymbols": [],
+      "studies": [],
+      "autosize": true
+    }
+      </script>
+    </div>
+  </div>
+  <style>
+  .hidden{
+    display: none;
+  }
+  </style>
+  <script>
+    function setGraph(timeframe) {
+      const allViews = ['1min', '3min', '5min','1h', '2h', '3h', '7d', '1d'];
+      allViews.forEach(d => {
+        document.getElementById(`view-${d}`).classList.add('hidden');
+      });
+      document.getElementById(`view-${timeframe}`).classList.remove('hidden');
+
+      // Активная кнопка
+      document.querySelectorAll('.range-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
+  </main>
+</body>
+</html>

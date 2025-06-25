@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход | GlobalInvest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='stylesheet' href='static/css/login.css'> 
+
+</head>
+<body class="light-theme">
+  <script>
+    // Удаление через 5 секунд
+    document.addEventListener("DOMContentLoaded", () => {
+      const flash = document.querySelector(".flash-message");
+      if (flash) {
+        setTimeout(() => {
+          flash.style.opacity = '0';
+          setTimeout(() => flash.remove(), 500);
+        }, 5000);
+      }
+    });
+  </script>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="flash-message" onclick="this.remove()">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌙 Тема</button>
+
+  <div class="ticker-row ticker-1">Apple • Ethereum • Meta • Binance • Ripple • Google • JPMorgan • Tesla • Solana • Nvidia • Sberbank • Coinbase</div>
+  <div class="ticker-row ticker-2">BTC • ETH • DOGE • ADA • TON • USDT • OpenAI • Amazon • Tinkoff • Monero • Stablecoins • ExxonMobil • Mastercard</div>
+  <div class="ticker-row ticker-3">PayPal • Gazprom • Microsoft • Polkadot • AVAX • LUKOIL • BNB • Uniswap • HSBC • Visa • Intel • Netflix</div>
+  <div class="ticker-row ticker-diag-left">Solana • TON • Ethereum • Monero • Google • Tinkoff • Tesla • Polkadot • Ripple • Apple • Coinbase • HSBC</div>
+  <div class="ticker-row ticker-diag-right">Sberbank • Microsoft • Binance • Dogecoin • OpenAI • JPMorgan • Amazon • Intel • Netflix • USDT • Nvidia</div>
+
+  <div class="form-card">
+    <h2>Вход в систему</h2>
+    <div id="error-container"></div>
+    <form method="POST" action="/login">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="password">Пароль:</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit">Войти</button>
+    </form>
+    <p>Нет аккаунта? <a href="/register">Зарегистрируйтесь</a></p>
+  </div>
+
+  <div class="modal" id="user-not-found-modal">
+    <div class="modal-content">
+      <p>Пользователь не найден. Проверьте email или зарегистрируйтесь.</p>
+      <button onclick="closeModal()">ОК</button>
+    </div>
+  </div>
+
+  <script>
+    const body = document.body;
+    const THEME_KEY = 'theme';
+
+    function applyTheme(theme) {
+      body.className = theme + '-theme';
+      localStorage.setItem(THEME_KEY, theme);
+    }
+
+    function toggleTheme() {
+      const newTheme = body.classList.contains('light-theme') ? 'dark' : 'light';
+      applyTheme(newTheme);
+    }
+
+    applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+
+    const form = document.getElementById('login-form');
+    const errorContainer = document.getElementById('error-container');
+    const modal = document.getElementById('user-not-found-modal');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      errorContainer.innerHTML = '';
+
+      const email = form.email.value.trim();
+      const password = form.password.value.trim();
+
+      let errors = [];
+      if (!email.includes('@')) errors.push('Введите корректный email.');
+      if (password.length < 6) errors.push('Пароль должен быть не менее 6 символов.');
+
+      if (errors.length > 0) {
+        errorContainer.innerHTML = errors.map(err => `<div class='error-message'>${err}</div>`).join('');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          window.location.href = '/dashboard';
+        } else if (result.reason === 'user_not_found') {
+          modal.style.display = 'flex';
+        } else if (result.reason === 'wrong_password') {
+          errorContainer.innerHTML = `<div class='error-message'>Неверный пароль</div>`;
+        } else {
+          errorContainer.innerHTML = `<div class='error-message'>Неизвестная ошибка</div>`;
+        }
+
+      } catch (err) {
+        console.error(err);
+        errorContainer.innerHTML = `<div class='error-message'>Ошибка соединения с сервером</div>`;
+      }
+    });
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+  </script>
+  </body>
+  </html>

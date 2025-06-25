@@ -1,0 +1,20 @@
+/*
+  Put your css here!
+*/
+#chat-form {
+    display: flex;
+    gap: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+#chat-input {
+    padding-left: 24px;
+    padding-right: 14px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    box-sizing: border-box;
+    flex: 1;
+    font-size: 16px;
+}

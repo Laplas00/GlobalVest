@@ -1,0 +1,236 @@
+.flash-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #f44336;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  z-index: 9999;
+  cursor: pointer;
+  transition: opacity 0.5s ease;
+}
+:root {
+  --bg-color: #f1f8e9;
+  --bg-gradient: linear-gradient(135deg, #f1f8e9, #c8e6c9);
+  --text-color: #1b5e20;
+  --input-bg: #ffffff;
+  --card-bg: #ffffffee;
+  --btn-color: #2e7d32;
+  --btn-hover: #1b5e20;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+.dark-theme {
+  --bg-color: #111;
+  --bg-gradient: linear-gradient(135deg, #111, #1e1e1e);
+  --text-color: #e0e0e0;
+  --input-bg: #1a1a1a;
+  --card-bg: #212121;
+  --btn-color: #43a047;
+  --btn-hover: #2e7d32;
+  --shadow: rgba(255, 255, 255, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-gradient);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  transition: background 0.4s ease, color 0.4s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.ticker-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ticker-line {
+  white-space: nowrap;
+  position: absolute;
+  width: 100%;
+  font-size: 24px;
+  opacity: 0.08;
+  animation: ticker 30s linear infinite;
+}
+
+.ticker-line:nth-child(odd) {
+  top: 25%;
+  animation-duration: 40s;
+}
+
+.ticker-line:nth-child(even) {
+  top: 60%;
+  animation-direction: reverse;
+}
+
+@keyframes ticker {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
+}
+
+.container {
+  background: var(--card-bg);
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px var(--shadow);
+  max-width: 400px;
+  width: 100%;
+  z-index: 1;
+  position: relative;
+  animation: fadeIn 0.5s ease;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  gap: 4px;
+}
+
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: var(--btn-color);
+  outline: none;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  min-height: 16px;
+}
+
+button {
+  padding: 12px;
+  background: var(--btn-color);
+  color: white;
+  border: none;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background: var(--btn-hover);
+  transform: scale(1.02);
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: 2px solid var(--btn-color);
+  color: var(--btn-color);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.theme-toggle:hover {
+  background: var(--btn-color);
+  color: white;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px var(--shadow);
+  z-index: 999;
+  display: none;
+  max-width: 90%;
+  width: 300px;
+  text-align: center;
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal button {
+  margin-top: 15px;
+  padding: 10px 16px;
+  background: var(--btn-color);
+  border: none;
+  color: white;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.modal button:hover {
+  background: var(--btn-hover);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 30px 20px;
+    margin: 0 15px;
+  }
+
+  .ticker-line {
+    font-size: 14px;
+  }
+}
+
+.already-reg{
+  font-size: 16px;
+  align-items: baseline;
+}
