@@ -98,16 +98,16 @@
         <div class="asset-card" data-delay="0">
           <div class="asset-header">
             <div class="asset-icon">
-              <img src="{{ asset[2] }}" height="50px">
+              <img src="{{ asset[3] }}" height="50px">
             </div>
             <div>
-              <div class="asset-name">{{ asset[0] }}</div>
+              <div class="asset-name">{{ asset[1] }}</div>
             </div>
           </div>
           <div class="asset-details">
             <div class="asset-row">
               <span class="asset-label">Текущая цена:</span>
-              <span class="asset-value">{{ asset[1] }}</span>
+              <span class="asset-value">{{ asset[2] }}</span>
             </div>
             <!-- <div class="asset-row"> -->
             <!--   <span class="asset-label">В вашем портфеле:</span> -->
@@ -127,11 +127,12 @@
           </div>
           <div class="asset-actions" style="margin-top: 20px;"> 
 
-            <form method="post" action="{{ url_for('toggle_asset') }}">
+            <form method="post" action="{{ url_for('toggle_asset') }}" style="width: 100%;">
               <input type="hidden" name="asset_name" value="{{asset[0]}}">
               <input type="hidden" name="asset_price" value="{{asset[1]}}">
-              <div style='display: relative;'>
-                 <button type="submit" class="asset-btn sell" style="width: 100%;">
+              <div style="width: 100%; display: inline-block;">
+                 <button type="submit" class="asset-btn sell" style="
+                    width: 80%;">
                   {% if asset[0] in user_assets.keys() %}
                     <input type="hidden" name="action" value='sell'> 
                     Продать
@@ -143,9 +144,16 @@
 
                 <input 
                   name="asset_amount" 
-                  style="20%"
+                  style="width: 10%; height: 30px; margin-left: 6%;
+                    background: none;
+                    border-radius: 5px;
+                    color: white;
+                    padding-left: 3px;
+                    -webkit-appearance: none;
+                    "
                   type="number"
                   placeholder="0"
+                  min='0'
                   required> 
               </div> 
             </form>  

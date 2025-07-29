@@ -10,10 +10,10 @@ from binance.exceptions import BinanceAPIException
 from requests.exceptions import ReadTimeout, ConnectionError
 
 def get_tickers_with_cur_price():
-    working_symbols = ['ATMUSDT', 'BNBUSDT', 
-                       'BTCUSDT', 'ETHUSDT',
-                       'SOLUSDT', 'POLUSDT',
-                       'TRXUSDT', 'XRPUSDT']
+    working_symbols = ['ATMUSDT', 'BNBUSDT', 'BTCUSDT', 'ETHUSDT', 'OMNIUSDT',
+                       'SOLUSDT', 'POLUSDT', 'TRXUSDT', 'XRPUSDT', 'CFXUSDT',
+                       'BIOUSDT', 'WINUSDT' ]
+
     base_url = "https://www.binance.com/en/trade/"
     working_tickers = []
 
@@ -52,5 +52,6 @@ def get_tickers_with_cur_price():
     #                    ['SOLUSDT', '186.96000000', 'static/ticker_images/SOL.png'],
     #                    ['TRXUSDT', '0.32420000', 'static/ticker_images/TRX.png'], 
     #                    ['XRPUSDT', '3.16070000', 'none']]
+
     return working_tickers
 

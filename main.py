@@ -40,6 +40,27 @@ def add_image_column_if_missing():
     conn.commit()
     conn.close()
 
+def get_user_orders(email, conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, symbol, price, status, amount FROM user_order_history WHERE email = ?', (email, ))
+    data = cursor.fetchall()
+    return data
+
+
+def add_order_to_user(email, symbol, price, status, amount, conn):
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO user_order_history (email, symbol, price, status, amount)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (email, symbol, price, status, amount))
+    conn.commit()
+
+def delete_order_from_user(order_id, conn):
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE status SET sell = ? WHERE id = ?
+    ''', (order_id, )) 
+    conn.commit()
 
 def init_db():
     if not os.path.exists(DB_NAME):
@@ -79,9 +100,13 @@ def init_db():
                 current_value REAL DEFAULT 0,
                 image TEXT
             )
-        ''')
+        ''')    
 
-        
+        for ticker in get_tickers_with_cur_price():
+            cursor.execute('''
+              INSERT INTO assets (name, current_value, image) VALUES (?, ?, ?)  
+           ''', (ticker[0], ticker[1], ticker[2])
+           ) 
 
         cursor.execute('''
             CREATE TABLE price_history (
@@ -254,6 +279,7 @@ def dashboard():
         return redirect('/login')
 
     user_id = session['user_id']
+    user_email = session['user_email']
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -266,14 +292,13 @@ def dashboard():
     balance = user_data[1]
 
     # Получаем список всех доступных активов, включая путь к изображению
-    # cursor.execute('SELECT id, name, current_value, image FROM assets')
-    # assets = cursor.fetchall()
-    assets = get_tickers_with_cur_price()
-
+    cursor.execute('SELECT id, name, current_value, image FROM assets')
+    assets = cursor.fetchall()
+    ic(assets)
+    user_orders = get_user_orders(user_email, conn)
+    ic(user_orders)
+    
     # Получаем активы, которые есть у пользователя
-    cursor.execute(
-        'SELECT ALL FROM user_order_history WHERE user_id = ?',
-        (user_id, ))
     user_assets = {row[0]: row[1] for row in cursor.fetchall()}
 
     conn.close()
@@ -395,20 +420,18 @@ def toggle_asset():
 
         cursor.execute('UPDATE users SET balance = ? WHERE email = ?',
                        (final_user_balance, email))
-        cursor.execute('INSERT INTO user_order_history (email, symbol, price, status, amount) VALUES (?, ?, ?, ?, ?)',
-                    (email, asset_name, price, 'buy', amount))
-
+        add_order_to_user(email, asset_name, price, 'buy', amount, conn)
         conn.commit()
         conn.close()
-
         flash(f'Куплено {amount} {asset_name}')
 
     else:
+        orders = get_user_orders(user_email, conn)
+        delete_order_from_user(order_id, conn)
         flash('Продано 0')
-        
-        ...
-    
+         
     return redirect('/dashboard') 
+
 
 @app.route('/asset/<asset_name>')
 def view_asset(asset_name):
