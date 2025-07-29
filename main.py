@@ -2,7 +2,7 @@ import os
 import sqlite3 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
-from tickers_data import get_tickers_with_cur_price
+# from tickers_data import get_tickers_with_cur_price
 
 # Создание Flask-приложения
 app = Flask(__name__)
